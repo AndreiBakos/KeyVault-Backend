@@ -2,20 +2,20 @@ using System.ComponentModel.DataAnnotations;
 using Dapper.Contrib.Extensions;
 namespace KeyVault.Entities
 {
-    [Table("User")]
-    public class User
+    [Table("Secret")]
+    public class Secret
     {
         [ExplicitKey]
         [MaxLength(250)]
-        public string UserId { get; set; } 
+        public string SecretId { get; set; }
         
         [MaxLength(250)]
-        public string UserName { get; set; }
+        public string Title { get; set; }
+    
+        [MaxLength(250)]
+        public string Content { get; set; }
         
         [MaxLength(250)]
-        public string Email { get; set; }
-        
-        [MaxLength(250)]
-        public string Password { get; set; }
+        public string DateCreated { get; set; }
     }
 }
