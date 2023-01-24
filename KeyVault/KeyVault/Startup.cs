@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KeyVault.DbContext;
+using KeyVault.Services.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -33,7 +35,8 @@ namespace KeyVault
                         builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());               
             });
             //To add services
-            // services.AddScoped<IUserServices, UserServices>();
+            services.AddTransient<KeyVaultContext>(_ => new KeyVaultContext(Configuration));
+            services.AddScoped<IUserServices, UserServices>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
