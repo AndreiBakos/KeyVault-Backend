@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using KeyVault.Entities;
 using KeyVault.Models.User;
 using KeyVault.Services.Users;
-using KeyVault.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace KeyVault.Controllers
 {
@@ -15,23 +14,14 @@ namespace KeyVault.Controllers
     public class UsersController: ControllerBase
     {
         private readonly IUserServices _userServices;
-        private readonly IConfiguration _configuration;
 
-        public UsersController(IUserServices userServices, IConfiguration configuration)
+        public UsersController(IUserServices userServices)
         {
             _userServices = userServices ?? throw new ArgumentNullException(nameof(userServices));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            ;
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAll()
-        {
-            var users = await _userServices.GetUsers();
-            return Ok(users);
         }
 
         [HttpGet("login")]
+        [Authorize]
         public async Task<ActionResult<UserForHome>> LoginUser([FromQuery] string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -45,10 +35,11 @@ namespace KeyVault.Controllers
             }
 
             var user = await _userServices.LoginUser(email, password);
+            
             return Ok(user);
         }
         
-        [HttpGet("create")]
+        [HttpPost("create")]
         public async Task<ActionResult<UserForHome>> CreateUser([FromBody] UserForCreation user)
         {
             if (string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
@@ -70,18 +61,6 @@ namespace KeyVault.Controllers
 
             var result = await _userServices.CreateUser(user);
             return Ok(result);
-        }
-
-        [HttpGet("crypto")]
-        public ActionResult EncryptData()
-        {
-            var tool = new CryptoTool();
-            var key = Guid.Parse(_configuration.GetSection("AppSettings").GetSection("Key").Value);
-            var iv = Guid.Parse(_configuration.GetSection("AppSettings").GetSection("Iv").Value);
-            var secret = tool.Encrypt("Hey there", key, iv);
-            var decrypt = tool.Decrypt(secret, key, iv); 
-
-            return Ok(new { hidden = secret, unhiden = decrypt});
         }
     }
 }
