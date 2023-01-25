@@ -17,5 +17,8 @@ namespace KeyVault.Entities
         
         [MaxLength(250)]
         public string DateCreated { get; set; }
+        
+        [MaxLength]
+        public string OwnerId { get; set; }
     }
 }
