@@ -45,10 +45,21 @@ namespace KeyVault.Services.Users
             var newUser = new User(user);
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {
-                var result = await connection.InsertAsync(newUser);
-
+                await connection.InsertAsync(newUser);
+                
                 var newUserForHome = new UserForHome(newUser);
                 return newUserForHome;
+            }
+        }
+
+        public async Task<IEnumerable<UserForHome>> FilterByUserName(string userName)
+        {
+            var query = $"SELECT userId as Id, userName, email FROM USER WHERE userName LIKE '{userName}%'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                var result = await connection.QueryAsync<UserForHome>(query, new { UserName = userName });
+
+                return result;
             }
         }
     }

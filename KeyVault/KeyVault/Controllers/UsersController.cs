@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KeyVault.Entities;
 using KeyVault.Models.User;
 using KeyVault.Services.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +10,7 @@ namespace KeyVault.Controllers
 {
     [Route("api/users")]
     [ApiController]
+    [Authorize]
     public class UsersController: ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -21,7 +21,6 @@ namespace KeyVault.Controllers
         }
 
         [HttpGet("login")]
-        [Authorize]
         public async Task<ActionResult<UserForHome>> LoginUser([FromQuery] string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -37,6 +36,19 @@ namespace KeyVault.Controllers
             var user = await _userServices.LoginUser(email, password);
             
             return Ok(user);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserForHome>>> FilterUsers([FromQuery] string userName)
+        {
+            if(string.IsNullOrEmpty(userName) || userName.Contains("'"))
+            {
+                return BadRequest("Invalid data provided!");
+            }
+
+            var users = await _userServices.FilterByUserName(userName);
+
+            return Ok(users);
         }
         
         [HttpPost("create")]

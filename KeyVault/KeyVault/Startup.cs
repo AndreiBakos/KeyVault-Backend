@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KeyVault.DbContext;
+using KeyVault.Services.Groups;
+using KeyVault.Services.Keys;
+using KeyVault.Services.Secrets;
 using KeyVault.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -57,6 +60,9 @@ namespace KeyVault
             //To add services
             services.AddTransient<KeyVaultContext>(_ => new KeyVaultContext(Configuration));
             services.AddScoped<IUserServices, UserServices>();
+            services.AddScoped<ISecretsService, SecretsService>();
+            services.AddScoped<IKeysService, KeysService>();
+            services.AddScoped<IGroupsService, GroupsService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

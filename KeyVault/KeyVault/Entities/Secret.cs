@@ -1,5 +1,8 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using Dapper.Contrib.Extensions;
+using KeyVault.Models.Secrets;
+
 namespace KeyVault.Entities
 {
     [Table("Secret")]
@@ -20,5 +23,15 @@ namespace KeyVault.Entities
         
         [MaxLength]
         public string OwnerId { get; set; }
+
+        public Secret() { }
+        public Secret(SecretForCreation secret)
+        {
+            SecretId = Guid.NewGuid().ToString();
+            Title = secret.Title;
+            Content = secret.Content;
+            DateCreated = DateTime.Now.ToString("dd/MM/yyyy");
+            OwnerId = secret.OwnerId;
+        }
     }
 }
