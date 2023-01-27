@@ -68,5 +68,25 @@ namespace KeyVault.Services.Groups
                 }
             }
         }
+
+        public async Task<GroupsForHome> Create(GroupForCreation group)
+        {
+            var newGroup = new Group(group);
+            var insertGroupQuery = @$"insert into `Group` VALUES (
+                            '{newGroup.GroupId}',
+                            '{newGroup.Title}',
+                            '{newGroup.OwnerId}')";
+            
+            // var insertGroupMemberQuery = ""
+            var newGroupMember = new GroupMember(new GroupMemberForCreation(newGroup.GroupId, newGroup.OwnerId));
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(insertGroupQuery);
+                await connection.InsertAsync(newGroupMember);
+
+                var groupForHome = new GroupsForHome(newGroup, await GetMembers(newGroup.GroupId));
+                return groupForHome;
+            }
+        }
     }
 }

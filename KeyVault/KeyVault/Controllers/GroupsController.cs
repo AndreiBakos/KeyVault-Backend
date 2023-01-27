@@ -35,6 +35,19 @@ namespace KeyVault.Controllers
             return Ok(groups);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<GroupsForHome>> Create([FromBody] GroupForCreation group)
+        {
+            if (string.IsNullOrEmpty(group.Title) || string.IsNullOrEmpty(group.OwnerId))
+            {
+                return BadRequest("Invalid data provided!");
+            }
+
+            var newgroup = await _groupsService.Create(group);
+
+            return Ok(newgroup);
+        }
+
         [HttpPost("members")]
         public async Task<ActionResult> InsertMember([FromBody] List<GroupMemberForCreation> groupMemberForCreation)
         {

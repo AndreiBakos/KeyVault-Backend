@@ -26,7 +26,7 @@ namespace KeyVault.Entities
         {
             GroupId = Guid.NewGuid().ToString();
             Title = group.Title;
-            OwnerId = group.Title;
+            OwnerId = group.OwnerId;
         }
     }
 }

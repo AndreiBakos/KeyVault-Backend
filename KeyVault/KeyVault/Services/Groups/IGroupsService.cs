@@ -11,5 +11,6 @@ namespace KeyVault.Services.Groups
         Task<IEnumerable<GroupsForHome>> Filter(string userId);
         Task<IEnumerable<UserForHome>> GetMembers(string groupId);
         Task InsertMember(List<GroupMemberForCreation> groupMemberForCreation);
+        Task<GroupsForHome> Create(GroupForCreation group);
     }
 }
