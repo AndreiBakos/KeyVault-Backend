@@ -1,5 +1,8 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using Dapper.Contrib.Extensions;
+using KeyVault.Models.User;
+
 namespace KeyVault.Entities
 {
     [Table("User")]
@@ -17,5 +20,13 @@ namespace KeyVault.Entities
         
         [MaxLength(250)]
         public string Password { get; set; }
+
+        public User(UserForCreation user)
+        {
+            UserId = Guid.NewGuid().ToString();
+            UserName = user.UserName;
+            Email = user.Email;
+            Password = user.Password;
+        }
     }
 }
