@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
-using DapperExtensions;
 using KeyVault.Entities;
 using KeyVault.Models.Secrets;
 using KeyVault.Tools;
@@ -57,6 +56,15 @@ namespace KeyVault.Services.Secrets
                 await connection.ExecuteAsync(query);
 
                 return newSecret;
+            }
+        }
+
+        public async Task Delete(string secretId)
+        {
+            var query = "DELETE FROM Secret WHERE secretId = @secretId";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(query, new {SecretId = secretId});
             }
         }
     }

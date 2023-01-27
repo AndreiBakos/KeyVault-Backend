@@ -48,5 +48,17 @@ namespace KeyVault.Controllers
             var newSecret = await _secretsService.Create(secret); 
             return Ok(newSecret);
         }
+
+        [HttpDelete]
+        public async Task<ActionResult> Delete([FromQuery] string secretId)
+        {
+            if (string.IsNullOrEmpty(secretId) || secretId.Contains("'"))
+            {
+                return BadRequest("Invalid data provided");
+            }
+
+            await _secretsService.Delete(secretId);
+            return Ok("Secret deleted successfully!");
+        }
     }
 }

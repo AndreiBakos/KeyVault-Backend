@@ -1,6 +1,9 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Dapper.Contrib.Extensions;
+using KeyVault.Models.Groups;
+
 namespace KeyVault.Entities
 {
     [Dapper.Contrib.Extensions.Table("Group")]
@@ -15,6 +18,15 @@ namespace KeyVault.Entities
         
         [MaxLength(250)]
         [ForeignKey("UserId")]
-        public string User_id { get; set; }
+        public string OwnerId { get; set; }
+
+        public Group() { }
+
+        public Group(GroupForCreation group)
+        {
+            GroupId = Guid.NewGuid().ToString();
+            Title = group.Title;
+            OwnerId = group.Title;
+        }
     }
 }
