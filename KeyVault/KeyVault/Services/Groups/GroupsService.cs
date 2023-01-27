@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using KeyVault.Entities;
+using KeyVault.Models.GroupMember;
 using KeyVault.Models.Groups;
 using KeyVault.Models.User;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +53,19 @@ namespace KeyVault.Services.Groups
                 var members = await connection.QueryAsync<UserForHome>(queryMembers);
 
                 return members;
+            }
+        }
+
+        public async Task InsertMember(List<GroupMemberForCreation> groupMemberForCreation)
+        {
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                foreach (var group in groupMemberForCreation)
+                {
+                    // var query = @$"INSERT INTO GroupMember ('{Guid.NewGuid()}', '{group.GroupId}', '{group.MemberId}')";
+                    var newGroupMembers = new GroupMember(group);
+                    await connection.InsertAsync(newGroupMembers);
+                }
             }
         }
     }
