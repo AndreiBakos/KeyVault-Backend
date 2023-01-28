@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using KeyVault.Entities;
 using KeyVault.Models.GroupMember;
 using KeyVault.Models.Groups;
+using KeyVault.Models.GroupSecrets;
+using KeyVault.Models.Secrets;
+using KeyVault.Models.User;
 using KeyVault.Services.Groups;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +51,32 @@ namespace KeyVault.Controllers
             return Ok(newgroup);
         }
 
+        [HttpDelete]
+        public async Task<ActionResult> Delete([FromQuery] string groupId)
+        {
+            if (string.IsNullOrEmpty(groupId) || groupId.Contains("'"))
+            {
+                return BadRequest("Invalid data provided");
+            }
+
+            await _groupsService.Delete(groupId);
+
+            return Ok("Group deleted successfully");
+        }
+
+        [HttpGet("members")]
+        public async Task<ActionResult<IEnumerable<UserForHome>>> GetMembers([FromQuery] string groupId)
+        {
+            if (string.IsNullOrEmpty(groupId) || groupId.Contains("'"))
+            {
+                return BadRequest("Invalid data provided!");
+            }
+
+            var members = await _groupsService.GetMembers(groupId);
+
+            return Ok(members);
+        }
+
         [HttpPost("members")]
         public async Task<ActionResult> InsertMember([FromBody] List<GroupMemberForCreation> groupMemberForCreation)
         {
@@ -60,7 +89,7 @@ namespace KeyVault.Controllers
                     return BadRequest("Invalid data provided!");
                 }
 
-                var members = await _groupsService.GetMembers(group.MemberId);
+                var members = await _groupsService.GetMembers(group.GroupId);
                 var hasMember = members.Any(m => m.Id.Equals(group.MemberId));
                 if (!hasMember)
                 {
@@ -70,6 +99,70 @@ namespace KeyVault.Controllers
 
             await _groupsService.InsertMember(filteredList);
             return Ok($"{groupMemberForCreation.Count} members added successfully");
+        }
+
+        [HttpDelete("members")]
+        public async Task<ActionResult> DeleteMember([FromBody] List<string> memberIds)
+        {
+            foreach (var memberId in memberIds)
+            {
+                if (string.IsNullOrEmpty(memberId) || memberId.Contains("'"))
+                {
+                    return BadRequest("Invalid data provided!");
+                }
+            }
+
+            await _groupsService.DeleteMember(memberIds);
+
+            return Ok("Members deleted successfully");
+        }
+
+        [HttpGet("secrets")]
+        public async Task<ActionResult<IEnumerable<SecretForHome>>> GetGroupSecrets([FromQuery] string groupId)
+        {
+            if (string.IsNullOrEmpty(groupId) || groupId.Contains("'"))
+            {
+                return BadRequest("Invalid data provided!");
+            }
+
+            var secrets = await _groupsService.GetGroupSecrets(groupId);
+
+            return Ok(secrets);
+        }
+
+        [HttpPost("secrets")]
+        public async Task<ActionResult<GroupSecret>> CreateGroupSecret(
+            [FromBody] GroupSecretsForCreation groupSecretsForCreation)
+        {
+            if (string.IsNullOrEmpty(groupSecretsForCreation.GroupId) ||
+                groupSecretsForCreation.GroupId.Contains("'") ||
+                string.IsNullOrEmpty(groupSecretsForCreation.Secret.OwnerId) ||
+                groupSecretsForCreation.Secret.OwnerId.Contains("'") ||
+                string.IsNullOrEmpty(groupSecretsForCreation.Secret.Title) ||
+                groupSecretsForCreation.Secret.Title.Contains("'") ||
+                string.IsNullOrEmpty(groupSecretsForCreation.Secret.Content) ||
+                groupSecretsForCreation.Secret.Content.Contains("'")
+               )
+            {
+                return BadRequest("Invalid data provider!");
+            }
+
+            var groupSecret = await _groupsService.CreateGroupSecret(groupSecretsForCreation);
+
+            return Ok(groupSecret);
+        }
+
+        [HttpDelete("secrets")]
+        public async Task<ActionResult> DeleteGroupSecret([FromQuery] string secretId)
+        {
+            if (string.IsNullOrEmpty(secretId) || secretId.Contains("'"))
+            {
+                return BadRequest("Invalid data provided!");
+            }
+
+            await _groupsService.DeleteGroupSecret(secretId);
+
+            return Ok("Group secret deleted successfully");
         }
     }
 }
