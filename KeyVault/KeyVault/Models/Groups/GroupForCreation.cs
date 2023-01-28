@@ -8,6 +8,6 @@ namespace KeyVault.Models.Groups
         public string Title { get; set; }
         
         [MaxLength(250)]
-        public string UserId { get; set; }
+        public string OwnerId { get; set; }
     }
 }

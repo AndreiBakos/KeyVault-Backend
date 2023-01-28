@@ -9,5 +9,13 @@ namespace KeyVault.Models.GroupMember
 
         [MaxLength(250)]
         public string MemberId { get; set; }
+
+        public GroupMemberForCreation() { }
+
+        public GroupMemberForCreation(string groupId, string memberId)
+        {
+            GroupId = groupId;
+            MemberId = memberId;
+        }
     }
 }

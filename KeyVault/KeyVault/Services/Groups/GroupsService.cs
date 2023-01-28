@@ -6,7 +6,11 @@ using Dapper.Contrib.Extensions;
 using KeyVault.Entities;
 using KeyVault.Models.GroupMember;
 using KeyVault.Models.Groups;
+using KeyVault.Models.GroupSecrets;
+using KeyVault.Models.Secrets;
 using KeyVault.Models.User;
+using KeyVault.Services.Secrets;
+using KeyVault.Tools;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
@@ -15,10 +19,11 @@ namespace KeyVault.Services.Groups
     public class GroupsService: IGroupsService
     {
         private readonly IConfiguration _config;
-
-        public GroupsService(IConfiguration config)
+        private readonly ISecretsService _secretsService;
+        public GroupsService(IConfiguration config, ISecretsService secretsService)
         {
             _config = config;
+            _secretsService = secretsService;
         }
 
         public async Task<IEnumerable<GroupsForHome>> Filter(string userId)
@@ -62,11 +67,106 @@ namespace KeyVault.Services.Groups
             {
                 foreach (var group in groupMemberForCreation)
                 {
-                    // var query = @$"INSERT INTO GroupMember ('{Guid.NewGuid()}', '{group.GroupId}', '{group.MemberId}')";
                     var newGroupMembers = new GroupMember(group);
                     await connection.InsertAsync(newGroupMembers);
                 }
             }
+        }
+
+        public async Task<GroupsForHome> Create(GroupForCreation group)
+        {
+            var newGroup = new Group(group);
+            var insertGroupQuery = @$"insert into `Group` VALUES (
+                            '{newGroup.GroupId}',
+                            '{newGroup.Title}',
+                            '{newGroup.OwnerId}')";
+
+            var newGroupMember = new GroupMember(new GroupMemberForCreation(newGroup.GroupId, newGroup.OwnerId));
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(insertGroupQuery);
+                await connection.InsertAsync(newGroupMember);
+
+                var groupForHome = new GroupsForHome(newGroup, await GetMembers(newGroup.GroupId));
+                return groupForHome;
+            }
+        }
+
+        public async Task Delete(string groupId)
+        {
+            var query = $@"DELETE FROM `Group` WHERE groupId = '{groupId}'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await DeleteGroupSecret(groupId);
+                await DeleteGroupMember(groupId);
+                await connection.ExecuteAsync(query);
+            }
+        }
+
+        public async Task DeleteGroupMember(string groupId)
+        {
+            var query = $@"DELETE FROM `GroupMember` WHERE groupId = '{groupId}'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(query);
+            }
+        }
+
+        public async Task<IEnumerable<SecretForHome>> GetGroupSecrets(string groupId)
+        {
+            var queryMembers = @$"SELECT s.secretId as Id, s.title, s.content, s.dateCreated, s.ownerId FROM Secret AS s
+                                INNER JOIN GroupSecret gs ON s.secretId = gs.secretId
+                                INNER JOIN `Group` g ON gs.group_id = g.groupId
+                                WHERE g.groupId = '{groupId}'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                var secrets = await connection.QueryAsync<SecretForHome>(queryMembers);
+                foreach (var secret in secrets)
+                {
+                    secret.Content = new CryptoTool()
+                        .Decrypt(
+                            secret.Content,
+                            Guid.Parse(_config["AppSettings:Key"]), 
+                            Guid.Parse(_config["AppSettings:Iv"])
+                        );
+                }
+                return secrets;
+            }
+        }
+
+        public async Task<GroupSecret> CreateGroupSecret(GroupSecretsForCreation groupSecret)
+        {
+            var newSecret = await _secretsService.Create(groupSecret.Secret);
+            var newGroupSecret = new GroupSecret(groupSecret, newSecret.SecretId);
+            var query = $@"INSERT INTO GroupSecret VALUES ('{newGroupSecret.GroupSecretId}', '{newGroupSecret.GroupId}', '{newGroupSecret.SecretId}')";
+
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(query);
+
+                return newGroupSecret;
+            }
+        }
+
+        public async Task DeleteGroupSecret(string secretId)
+        {
+            var query = $@"DELETE FROM GroupSecret WHERE secretId = '{secretId}'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(query);
+            }
+        }
+
+        public async Task DeleteMember(List<string> memberIds)
+        {
+
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                foreach (var memberId in memberIds)
+                {
+                    await connection.ExecuteAsync($@"DELETE FROM GroupMember WHERE memberId = '{memberId}'");
+                }
+            }            
         }
     }
 }
