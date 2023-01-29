@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using KeyVault.Entities;
-using KeyVault.Models.Secrets;
 using KeyVault.Models.User;
-using Microsoft.AspNetCore.DataProtection;
 
 namespace KeyVault.Models.Groups
 {

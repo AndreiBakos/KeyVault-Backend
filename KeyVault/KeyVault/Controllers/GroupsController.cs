@@ -102,9 +102,9 @@ namespace KeyVault.Controllers
         }
 
         [HttpDelete("members")]
-        public async Task<ActionResult> DeleteMember([FromBody] List<string> memberIds)
+        public async Task<ActionResult> DeleteMember([FromQuery] List<string> ids)
         {
-            foreach (var memberId in memberIds)
+            foreach (var memberId in ids)
             {
                 if (string.IsNullOrEmpty(memberId) || memberId.Contains("'"))
                 {
@@ -112,7 +112,7 @@ namespace KeyVault.Controllers
                 }
             }
 
-            await _groupsService.DeleteMember(memberIds);
+            await _groupsService.DeleteMember(ids);
 
             return Ok("Members deleted successfully");
         }
