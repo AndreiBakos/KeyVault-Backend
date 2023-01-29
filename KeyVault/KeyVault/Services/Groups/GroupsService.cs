@@ -97,15 +97,29 @@ namespace KeyVault.Services.Groups
             var query = $@"DELETE FROM `Group` WHERE groupId = '{groupId}'";
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {
-                await DeleteGroupSecret(groupId);
+                var ownerSecrets = await GetGroupSecrets(groupId);
+                await DeleteAllGroupSecrets(groupId);
                 await DeleteGroupMember(groupId);
                 await connection.ExecuteAsync(query);
+                foreach (var secret in ownerSecrets)
+                {
+                    await _secretsService.Delete(secret.Id);
+                }
             }
         }
 
         public async Task DeleteGroupMember(string groupId)
         {
             var query = $@"DELETE FROM `GroupMember` WHERE groupId = '{groupId}'";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                await connection.ExecuteAsync(query);
+            }
+        }
+
+        public async Task DeleteAllGroupSecrets(string groupId)
+        {
+            var query = $@"DELETE FROM `GroupSecret` WHERE group_id = '{groupId}'";
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {
                 await connection.ExecuteAsync(query);
@@ -134,7 +148,7 @@ namespace KeyVault.Services.Groups
             }
         }
 
-        public async Task<GroupSecret> CreateGroupSecret(GroupSecretsForCreation groupSecret)
+        public async Task<Secret> CreateGroupSecret(GroupSecretsForCreation groupSecret)
         {
             var newSecret = await _secretsService.Create(groupSecret.Secret);
             var newGroupSecret = new GroupSecret(groupSecret, newSecret.SecretId);
@@ -144,7 +158,7 @@ namespace KeyVault.Services.Groups
             {
                 await connection.ExecuteAsync(query);
 
-                return newGroupSecret;
+                return await _secretsService.FilterById(newSecret.SecretId);
             }
         }
 

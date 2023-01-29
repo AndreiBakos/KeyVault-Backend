@@ -19,6 +19,22 @@ namespace KeyVault.Services.Secrets
             _config = config;
         }
 
+        public async Task<Secret> FilterById(string secretId)
+        {
+            var query = @"SELECT * FROM Secret WHERE secretId = @secretId";
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                var secret = await connection.QueryFirstOrDefaultAsync<Secret>(query, new {SecretId = secretId});
+
+                secret.Content = new CryptoTool().Decrypt(
+                    secret.Content,
+                    Guid.Parse(_config["AppSettings:Key"]),
+                    Guid.Parse(_config["AppSettings:Iv"]));
+
+                return secret;
+            }
+        }
+
         public  async Task<IEnumerable<Secret>> GetSecrets(string ownerId)
         {
             var query = $"SELECT * FROM Secret WHERE ownerId = @ownerId";

@@ -30,7 +30,7 @@ namespace KeyVault.Services.Users
 
         public async Task<UserForHome> LoginUser(string email, string password)
         {
-            var query = @"SELECT userId, userName, email FROM User WHERE email = @email AND password = @password";
+            var query = @"SELECT userId as Id, userName, email FROM User WHERE email = @email AND password = @password";
             
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {

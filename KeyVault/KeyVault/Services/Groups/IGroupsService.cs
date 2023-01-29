@@ -17,8 +17,9 @@ namespace KeyVault.Services.Groups
         Task<GroupsForHome> Create(GroupForCreation group);
         Task Delete(string groupId);
         Task DeleteGroupMember(string groupId);
+        Task DeleteAllGroupSecrets(string groupId);
         Task<IEnumerable<SecretForHome>> GetGroupSecrets(string groupId);
-        Task<GroupSecret> CreateGroupSecret(GroupSecretsForCreation groupSecret);
+        Task<Secret> CreateGroupSecret(GroupSecretsForCreation groupSecret);
         Task DeleteGroupSecret(string secretId);
         Task DeleteMember(List<string> memberIds);
     }

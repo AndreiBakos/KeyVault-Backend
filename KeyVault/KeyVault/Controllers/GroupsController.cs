@@ -78,7 +78,7 @@ namespace KeyVault.Controllers
         }
 
         [HttpPost("members")]
-        public async Task<ActionResult> InsertMember([FromBody] List<GroupMemberForCreation> groupMemberForCreation)
+        public async Task<ActionResult<IEnumerable<UserForHome>>> InsertMember([FromBody] List<GroupMemberForCreation> groupMemberForCreation)
         {
             var filteredList = new List<GroupMemberForCreation>();
             foreach (var group in groupMemberForCreation)
@@ -98,7 +98,7 @@ namespace KeyVault.Controllers
             }
 
             await _groupsService.InsertMember(filteredList);
-            return Ok($"{groupMemberForCreation.Count} members added successfully");
+            return Ok(filteredList);
         }
 
         [HttpDelete("members")]
@@ -131,7 +131,7 @@ namespace KeyVault.Controllers
         }
 
         [HttpPost("secrets")]
-        public async Task<ActionResult<GroupSecret>> CreateGroupSecret(
+        public async Task<ActionResult<Secret>> CreateGroupSecret(
             [FromBody] GroupSecretsForCreation groupSecretsForCreation)
         {
             if (string.IsNullOrEmpty(groupSecretsForCreation.GroupId) ||
