@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KeyVault.Entities;
 using KeyVault.Models.Secrets;
+using KeyVault.Services.Groups;
 using KeyVault.Services.Secrets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,11 @@ namespace KeyVault.Controllers
     public class SecretsController: ControllerBase
     {
         private readonly ISecretsService _secretsService;
-
-        public SecretsController(ISecretsService secretsService)
+        private readonly IGroupsService _groupsService;
+        public SecretsController(ISecretsService secretsService, IGroupsService groupsService)
         {
             _secretsService = secretsService ?? throw new ArgumentNullException(nameof(secretsService));
+            _groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
         }
 
         [HttpGet]
@@ -57,6 +59,7 @@ namespace KeyVault.Controllers
                 return BadRequest("Invalid data provided");
             }
 
+            await _groupsService.DeleteGroupSecret(secretId);
             await _secretsService.Delete(secretId);
             return Ok("Secret deleted successfully!");
         }

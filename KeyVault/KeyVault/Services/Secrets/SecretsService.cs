@@ -70,7 +70,13 @@ namespace KeyVault.Services.Secrets
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {
                 await connection.ExecuteAsync(query);
-
+                
+                newSecret.Content = new CryptoTool()
+                    .Decrypt(
+                        newSecret.Content,
+                        Guid.Parse(_config["AppSettings:Key"]), 
+                        Guid.Parse(_config["AppSettings:Iv"])
+                    );
                 return newSecret;
             }
         }
