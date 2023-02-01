@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using KeyVault.Entities;
 using KeyVault.Models.User;
+using KeyVault.Tools;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
@@ -37,6 +40,18 @@ namespace KeyVault.Services.Users
                 var result = await connection.QueryFirstOrDefaultAsync<UserForHome>(query, new { Email = email, Password = password });
                 
                 return result;
+            }
+        }
+
+        public async Task<bool> CheckIfUserExists(string email, string password)
+        {
+            var query = @"SELECT userId as Id, userName, email FROM User WHERE email = @email";
+            
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                var result = await connection.QueryAsync<UserForHome>(query, new { Email = email, Password = password });
+                
+                return result.Any();
             }
         }
 

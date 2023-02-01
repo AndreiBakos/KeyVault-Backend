@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KeyVault.Entities;
 using KeyVault.Models.User;
 using KeyVault.Services.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -65,9 +64,9 @@ namespace KeyVault.Controllers
                 return BadRequest("Invalid data provided");
             }
 
-            var checkIfUserExists = await _userServices.LoginUser(user.Email, user.Password);
+            var checkIfUserExists = await _userServices.CheckIfUserExists(user.Email, user.Password);
 
-            if (checkIfUserExists != null)
+            if (checkIfUserExists)
             {
                 return BadRequest("User already exists with these credentials");
             }

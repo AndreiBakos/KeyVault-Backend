@@ -98,21 +98,20 @@ namespace KeyVault.Controllers
             }
 
             await _groupsService.InsertMember(filteredList);
-            return Ok(filteredList);
+            var newMembersList = await _groupsService.GetMembers(groupMemberForCreation.FirstOrDefault().GroupId);
+            return Ok(newMembersList);
         }
 
         [HttpDelete("members")]
-        public async Task<ActionResult> DeleteMember([FromQuery] List<string> ids)
+        public async Task<ActionResult> DeleteMember([FromQuery] string ids)
         {
-            foreach (var memberId in ids)
+            if (string.IsNullOrEmpty(ids) || ids.Contains("'"))
             {
-                if (string.IsNullOrEmpty(memberId) || memberId.Contains("'"))
-                {
-                    return BadRequest("Invalid data provided!");
-                }
+                return BadRequest("Invalid data provided!");
             }
 
-            await _groupsService.DeleteMember(ids);
+            var idList = ids.Split(",").ToList();
+            await _groupsService.DeleteMember(idList);
 
             return Ok("Members deleted successfully");
         }

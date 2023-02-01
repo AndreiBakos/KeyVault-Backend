@@ -40,8 +40,11 @@ namespace KeyVault.Controllers
         {
             if (
                 string.IsNullOrEmpty(secret.Content) ||
+                secret.Content.Contains("'") ||
                 string.IsNullOrEmpty(secret.Title) ||
-                string.IsNullOrEmpty(secret.OwnerId)
+                secret.Title.Contains("'") ||
+                string.IsNullOrEmpty(secret.OwnerId) ||
+                secret.OwnerId.Contains("'")
             )
             {
                 return BadRequest("Invalid data provided");
