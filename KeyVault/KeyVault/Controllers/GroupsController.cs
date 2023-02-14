@@ -25,10 +25,26 @@ namespace KeyVault.Controllers
             _groupsService = groupsService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GroupsForHome>> Get([FromRoute] string id)
+        {
+            if (string.IsNullOrEmpty(id) || id.Contains("'"))
+            {
+                return BadRequest("Invalid data provided");
+            }
+
+            var group = await _groupsService.Get(id);
+            if (group == null)
+            {
+                return BadRequest("Group could not be found");
+            }
+            return Ok(group);
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupsForHome>>> Filter([FromQuery] string userId)
         {
-            if (string.IsNullOrEmpty(userId) || userId.Contains(","))
+            if (string.IsNullOrEmpty(userId) || userId.Contains("'"))
             {
                 return BadRequest("Invalid data provided");
             }

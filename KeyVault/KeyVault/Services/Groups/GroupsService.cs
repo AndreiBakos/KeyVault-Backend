@@ -26,6 +26,24 @@ namespace KeyVault.Services.Groups
             _secretsService = secretsService;
         }
 
+        public async Task<GroupsForHome> Get(string id)
+        {
+            var query = @$"SELECT g.groupId, g.title, g.owner_id as ownerId                       
+                                FROM `Group` as g INNER JOIN GroupMember gm ON g.groupId = gm.groupId
+                                WHERE g.groupId = @groupId";
+
+            using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
+            {
+                var group = await connection.QueryFirstOrDefaultAsync<GroupsForHome>(query, new { GroupId = id });
+                if (group == null)
+                {
+                    return null;
+                }
+                group.Members = await GetMembers(id);
+                return group;
+            }
+        }
+
         public async Task<IEnumerable<GroupsForHome>> Filter(string userId)
         {
             var newGroupForHomeList = new List<GroupsForHome>();
