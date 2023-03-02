@@ -8,7 +8,7 @@ namespace KeyVault.Services.Secrets
     public interface ISecretsService
     {
         Task<Secret> FilterById(string secretId);
-        Task<IEnumerable<Secret>> GetSecrets(string ownerId);
+        Task<IEnumerable<SecretForHome>> GetSecrets(string ownerId);
         Task<Secret> Create(SecretForCreation secret);
         Task Delete(string secretId);
     }

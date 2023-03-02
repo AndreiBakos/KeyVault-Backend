@@ -35,12 +35,12 @@ namespace KeyVault.Services.Secrets
             }
         }
 
-        public  async Task<IEnumerable<Secret>> GetSecrets(string ownerId)
+        public  async Task<IEnumerable<SecretForHome>> GetSecrets(string ownerId)
         {
-            var query = $"SELECT * FROM Secret WHERE ownerId = @ownerId";
+            var query = $"SELECT secretId as Id, title, content, dateCreated, ownerId  FROM Secret WHERE ownerId = @ownerId ORDER BY dateCreated DESC";
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
             {
-                var secrets = await connection.QueryAsync<Secret>(query, new { OwnerId = ownerId });
+                var secrets = await connection.QueryAsync<SecretForHome>(query, new { OwnerId = ownerId });
 
                 foreach (var secret in secrets)
                 {
@@ -50,6 +50,8 @@ namespace KeyVault.Services.Secrets
                             Guid.Parse(_config["AppSettings:Key"]), 
                             Guid.Parse(_config["AppSettings:Iv"])
                             );
+                    var indexAtFirstWhiteSpace = secret.DateCreated.IndexOf(" ", StringComparison.Ordinal);
+                    secret.DateCreated = secret.DateCreated.Substring(0, indexAtFirstWhiteSpace);
                 }
                 return secrets;
             }

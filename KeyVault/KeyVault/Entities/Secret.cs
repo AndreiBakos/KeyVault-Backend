@@ -30,7 +30,7 @@ namespace KeyVault.Entities
             SecretId = Guid.NewGuid().ToString();
             Title = secret.Title;
             Content = secret.Content;
-            DateCreated = DateTime.Now.ToString("dd/MM/yyyy");
+            DateCreated = DateTime.Now.ToString("yy-MM-dd hh:mm:ss");
             OwnerId = secret.OwnerId;
         }
     }

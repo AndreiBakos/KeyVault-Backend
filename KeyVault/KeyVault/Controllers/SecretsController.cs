@@ -36,7 +36,7 @@ namespace KeyVault.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Secret>> Create([FromBody] SecretForCreation secret)
+        public async Task<ActionResult<SecretForHome>> Create([FromBody] SecretForCreation secret)
         {
             if (
                 string.IsNullOrEmpty(secret.Content) ||
