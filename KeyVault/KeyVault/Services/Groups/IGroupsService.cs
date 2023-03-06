@@ -20,7 +20,7 @@ namespace KeyVault.Services.Groups
         Task DeleteGroupMember(string groupId);
         Task DeleteAllGroupSecrets(string groupId);
         Task<IEnumerable<SecretForHome>> GetGroupSecrets(string groupId);
-        Task<Secret> CreateGroupSecret(GroupSecretsForCreation groupSecret);
+        Task<SecretForHome> CreateGroupSecret(GroupSecretsForCreation groupSecret);
         Task DeleteGroupSecret(string secretId);
         Task DeleteMember(List<string> memberIds);
     }

@@ -166,7 +166,7 @@ namespace KeyVault.Services.Groups
             }
         }
 
-        public async Task<Secret> CreateGroupSecret(GroupSecretsForCreation groupSecret)
+        public async Task<SecretForHome> CreateGroupSecret(GroupSecretsForCreation groupSecret)
         {
             var newSecret = await _secretsService.Create(groupSecret.Secret);
             var newGroupSecret = new GroupSecret(groupSecret, newSecret.SecretId);
@@ -176,6 +176,7 @@ namespace KeyVault.Services.Groups
             {
                 await connection.ExecuteAsync(query);
 
+                
                 return await _secretsService.FilterById(newSecret.SecretId);
             }
         }

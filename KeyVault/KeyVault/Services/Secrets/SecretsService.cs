@@ -19,7 +19,7 @@ namespace KeyVault.Services.Secrets
             _config = config;
         }
 
-        public async Task<Secret> FilterById(string secretId)
+        public async Task<SecretForHome> FilterById(string secretId)
         {
             var query = @"SELECT * FROM Secret WHERE secretId = @secretId";
             using (var connection = new MySqlConnection(_config.GetConnectionString("KeyVaultDb")))
@@ -31,7 +31,14 @@ namespace KeyVault.Services.Secrets
                     Guid.Parse(_config["AppSettings:Key"]),
                     Guid.Parse(_config["AppSettings:Iv"]));
 
-                return secret;
+                return new SecretForHome()
+                {
+                    Id = secret.SecretId,
+                    Title = secret.Title,
+                    Content = secret.Content,
+                    DateCreated = secret.DateCreated,
+                    OwnerId = secret.OwnerId
+                };
             }
         }
 

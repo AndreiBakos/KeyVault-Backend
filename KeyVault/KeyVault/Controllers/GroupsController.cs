@@ -146,7 +146,7 @@ namespace KeyVault.Controllers
         }
 
         [HttpPost("secrets")]
-        public async Task<ActionResult<Secret>> CreateGroupSecret(
+        public async Task<ActionResult<SecretForHome>> CreateGroupSecret(
             [FromBody] GroupSecretsForCreation groupSecretsForCreation)
         {
             if (string.IsNullOrEmpty(groupSecretsForCreation.GroupId) ||
